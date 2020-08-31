@@ -2,7 +2,7 @@ def call(String goToolName='go-1.12', String golangCiVersion='v1.18.0'){
     pipeline{
         agent any
         tools {
-            go $goToolName
+            go "$goToolName"
         }
         environment {
             GO111MODULE = 'on'
