@@ -1,42 +1,43 @@
-def call(String goToolName='go-1.12', String golangCiVersion='v1.18.0')
-pipeline{
-    agent any
-    tools {
-        go '$goToolName'
-    }
-    environment {
-        GO111MODULE = 'on'
-    }
-    stages{
-        stage('Build'){
-            steps{
-                sh 'go build'
-            }
+def call(String goToolName='go-1.12', String golangCiVersion='v1.18.0'){
+    pipeline{
+        agent any
+        tools {
+            go '$goToolName'
         }
-
-        stage('Test'){
-            steps{
-                sh 'go test ./... -coverprofile=coverage.txt'
-                sh "curl -s https://codecov.io/bash | bash -s -"
-            }
+        environment {
+            GO111MODULE = 'on'
         }
+        stages{
+            stage('Build'){
+                steps{
+                    sh 'go build'
+                }
+            }
 
-        steps('Code Analysis'){
-            steps{
-                sh 'curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin $golangCiVersion'
-                sh 'golangci-lint run'
+            stage('Test'){
+                steps{
+                    sh 'go test ./... -coverprofile=coverage.txt'
+                    sh "curl -s https://codecov.io/bash | bash -s -"
+                }
             }
-        }
 
-        stage('Release'){
-            when{
-                buildingTag()
+            steps('Code Analysis'){
+                steps{
+                    sh 'curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin $golangCiVersion'
+                    sh 'golangci-lint run'
+                }
             }
-            environment{
-                GITHUB_TOKEN = credentials('GITHUB_TOKEN')
-            }
-            steps{
-                sh 'curl -sL https://git.io/goreleaser | bash'
+
+            stage('Release'){
+                when{
+                    buildingTag()
+                }
+                environment{
+                    GITHUB_TOKEN = credentials('GITHUB_TOKEN')
+                }
+                steps{
+                    sh 'curl -sL https://git.io/goreleaser | bash'
+                }
             }
         }
     }
