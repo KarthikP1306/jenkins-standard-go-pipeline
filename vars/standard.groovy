@@ -2,7 +2,7 @@ def call(String goToolName='go-1.12', String golangCiVersion='v1.18.0'){
     pipeline{
         agent any
         tools {
-            go '$goToolName'
+            go $goToolName
         }
         environment {
             GO111MODULE = 'on'
@@ -21,7 +21,7 @@ def call(String goToolName='go-1.12', String golangCiVersion='v1.18.0'){
                 }
             }
 
-            steps('Code Analysis'){
+            stage('Code Analysis'){
                 steps{
                     sh 'curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin $golangCiVersion'
                     sh 'golangci-lint run'
